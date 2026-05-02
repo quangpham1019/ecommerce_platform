@@ -1,0 +1,31 @@
+# IntelliJ
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+
+# Java / Maven
+target/
+*.class
+.mvn/wrapper/maven-wrapper.jar
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.*
+
+# Local overrides
+backend/src/main/resources/application-local.yml
+
+# Node if a frontend is added later
+node_modules/
+dist/
+coverage/
