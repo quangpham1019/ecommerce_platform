@@ -45,6 +45,10 @@ Tradeoffs:
 - Spring Boot adds more framework structure than lighter Java options
 - MySQL-specific behavior should be validated in tests rather than assumed
 
+Additional testing consequence:
+
+- Integration tests rely on Testcontainers which requires a working Docker daemon accessible to the JVM. Recent Docker Desktop / Engine versions may require aligning the docker-java client API version with the daemon; to accommodate this we keep `backend/src/test/resources/docker-java.properties` with `api.version=1.44`. Alternately teams can set a compatible `min-api-version` on the Docker Engine or upgrade Testcontainers/docker-java to match the Docker Engine API. See `docs/test-strategy.md` for local setup guidance.
+
 ## Alternatives Considered
 
 ### Node.js Backend
