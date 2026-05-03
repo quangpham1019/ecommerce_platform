@@ -2,6 +2,7 @@ package com.quang.marketplace.modules.identity.api;
 
 import com.quang.marketplace.modules.identity.application.AuthService;
 import jakarta.validation.Valid;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,5 +20,10 @@ public class AuthController {
     @ResponseStatus(HttpStatus.CREATED)
     public AuthUserResponse register(@Valid @RequestBody RegisterRequest request) {
         return authService.register(request);
+    }
+
+    @PostMapping("/login")
+    public AuthUserResponse login(@Valid @RequestBody RegisterRequest request, HttpServletRequest httpRequest) {
+        return authService.login(request, httpRequest);
     }
 }

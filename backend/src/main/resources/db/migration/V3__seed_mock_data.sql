@@ -1,7 +1,7 @@
 -- Seed users
 INSERT INTO users (email, password_hash) VALUES
-('seller1@example.com', '$2a$10$XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'),
-('buyer1@example.com', '$2a$10$XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX');
+('seller1@example.com', '$2a$12$nEYFAeWNuxhCCvojoLeWR.V4OgEwkZANQrnYEWXmoYvP55eKCUKAu'),
+('buyer1@example.com', '$2a$12$nEYFAeWNuxhCCvojoLeWR.V4OgEwkZANQrnYEWXmoYvP55eKCUKAu');
 
 -- Note: replace password_hash placeholders in real environments. For tests the application encodes passwords on register.
 

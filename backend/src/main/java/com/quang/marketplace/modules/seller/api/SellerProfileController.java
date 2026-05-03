@@ -2,6 +2,7 @@ package com.quang.marketplace.modules.seller.api;
 
 import com.quang.marketplace.modules.seller.domain.SellerProfile;
 import com.quang.marketplace.modules.seller.infrastructure.SellerProfileRepository;
+import com.quang.marketplace.shared.security.CurrentUserProvider;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -15,16 +16,19 @@ import java.net.URI;
 public class SellerProfileController {
 
     private final SellerProfileRepository repo;
+    private final CurrentUserProvider currentUserProvider;
 
-    public SellerProfileController(SellerProfileRepository repo) {
+    public SellerProfileController(SellerProfileRepository repo, CurrentUserProvider currentUserProvider) {
         this.repo = repo;
+        this.currentUserProvider = currentUserProvider;
     }
 
     record CreateSellerProfileRequest(String displayName) {}
 
     @PostMapping
-    public ResponseEntity<?> create(@RequestHeader("X-User-Id") Long userId,
-                                    @RequestBody CreateSellerProfileRequest req) {
+    public ResponseEntity<?> create(@RequestBody CreateSellerProfileRequest req) {
+
+        Long userId = currentUserProvider.getCurrentUserId();
 
         if (req.displayName() == null || req.displayName().isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "displayName is required");

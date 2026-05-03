@@ -102,4 +102,9 @@ public class ProductService {
         product.setPublished(true);
         productRepo.save(product);
     }
+
+    @Transactional(readOnly = true)
+    public java.util.List<Product> listPublishedProducts() {
+        return productRepo.findByPublishedTrue();
+    }
 }

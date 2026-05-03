@@ -6,7 +6,15 @@ import com.quang.marketplace.modules.identity.domain.User;
 import com.quang.marketplace.modules.identity.infrastructure.UserRepository;
 import com.quang.marketplace.shared.error.BusinessRuleException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Service;
+
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @Service
 public class AuthService {
@@ -35,5 +43,36 @@ public class AuthService {
         User saved = userRepository.save(user);
 
         return new AuthUserResponse(saved.getId(), saved.getEmail());
+    }
+
+    public AuthUserResponse login(RegisterRequest request, HttpServletRequest httpRequest) {
+        String normalizedEmail = request.email().trim().toLowerCase();
+
+        var userOpt = userRepository.findByEmail(normalizedEmail);
+        if (userOpt.isEmpty()) {
+            throw new BusinessRuleException("Invalid credentials");
+        }
+
+        var user = userOpt.get();
+        if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
+            throw new BusinessRuleException("Invalid credentials");
+        }
+
+        // Establish a session-based Authentication where principal is UserPrincipal.
+        var principal = new com.quang.marketplace.shared.security.UserPrincipal(user.getId(), user.getEmail());
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+            principal,
+            null,
+            List.of(new SimpleGrantedAuthority("ROLE_USER"))
+        );
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        // Persist security context to the HTTP session so subsequent requests are authenticated
+        httpRequest.getSession(true).setAttribute(
+            HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+            SecurityContextHolder.getContext()
+        );
+
+        return new AuthUserResponse(user.getId(), user.getEmail());
     }
 }

@@ -9,7 +9,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-class UserRepositoryTest {
+@org.springframework.transaction.annotation.Transactional
+class UserRepositoryTest extends com.quang.marketplace.AbstractIntegrationTest {
 
     @Autowired
     private UserRepository userRepository;
