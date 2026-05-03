@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Marketplace - Demo</title>
+  <style>body{font-family:Arial;margin:20px}input,button{padding:6px;margin:4px}</style>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <h1>Marketplace (Demo)</h1>
+
+  <section id="auth">
+    <h2>Register</h2>
+    <input id="reg-email" placeholder="email" />
+    <input id="reg-password" placeholder="password" type="password" />
+    <button id="btn-register">Register</button>
+
+    <h2>Login</h2>
+    <input id="login-email" placeholder="email" />
+    <input id="login-password" placeholder="password" type="password" />
+    <button id="btn-login">Login</button>
+    <div id="auth-msg"></div>
+  </section>
+
+  <section id="products">
+    <h2>Products</h2>
+    <div id="product-list">Loading...</div>
+  </section>
+
+</body>
+</html>
