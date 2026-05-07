@@ -30,6 +30,7 @@ public class AuthService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    //TODO: use updateProfile method to allow users to update their profile information (first name, last name, etc.)
     public AuthUserResponse register(RegisterRequest request) {
         String normalizedEmail = request.email().trim().toLowerCase();
 

@@ -34,7 +34,7 @@ public class SellerProfileController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "displayName is required");
         }
 
-        if (repo.existsByUserIdAndActiveTrue(userId)) {
+        if (repo.existsByUserIdAndStatus(userId, "ACTIVE")) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "User already has an active seller profile");
         }
 

@@ -19,7 +19,7 @@ export default function Home(){
     <section className="grid gap-4">
       {products.map(p => (
         <div key={p.id} className="bg-white p-4 rounded shadow">
-          <h3 className="font-medium">{p.title}</h3>
+          <h3 className="font-medium">{p.name}</h3>
           <p className="text-sm text-gray-600">{p.description}</p>
         </div>
       ))}

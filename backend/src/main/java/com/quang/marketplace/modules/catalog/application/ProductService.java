@@ -1,6 +1,6 @@
 package com.quang.marketplace.modules.catalog.application;
 
-import com.quang.marketplace.modules.catalog.domain.InventoryItem;
+import com.quang.marketplace.modules.catalog.domain.ProductVariantInventory;
 import com.quang.marketplace.modules.catalog.domain.Product;
 import com.quang.marketplace.modules.catalog.domain.ProductVariant;
 import com.quang.marketplace.modules.catalog.infrastructure.InventoryRepository;
@@ -35,7 +35,7 @@ public class ProductService {
 
     @Transactional
     public Product createProduct(Long userId, String title, String description) {
-        var sellerOpt = sellerRepo.findByUserIdAndActiveTrue(userId);
+        var sellerOpt = sellerRepo.findByUserIdAndStatus(userId, "ACTIVE");
         if (sellerOpt.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User has no active seller profile");
         }
@@ -50,7 +50,7 @@ public class ProductService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
 
         // ownership
-        var sellerOpt = sellerRepo.findByUserIdAndActiveTrue(userId);
+        var sellerOpt = sellerRepo.findByUserIdAndStatus(userId, "ACTIVE");
         if (sellerOpt.isEmpty() || !sellerOpt.get().getId().equals(product.getSellerProfileId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not owner of product");
         }
@@ -66,10 +66,10 @@ public class ProductService {
             }
         }
 
-        ProductVariant variant = new ProductVariant(productId, sku, price);
+        ProductVariant variant = new ProductVariant(product, sku, price);
         ProductVariant saved = variantRepo.save(variant);
 
-        InventoryItem item = new InventoryItem(saved.getId(), quantity);
+        ProductVariantInventory item = new ProductVariantInventory(saved.getId(), quantity);
         inventoryRepo.save(item);
 
         return saved;
@@ -80,7 +80,7 @@ public class ProductService {
         Product product = productRepo.findById(productId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
 
-        var sellerOpt = sellerRepo.findByUserIdAndActiveTrue(userId);
+        var sellerOpt = sellerRepo.findByUserIdAndStatus(userId, "ACTIVE");
         if (sellerOpt.isEmpty() || !sellerOpt.get().getId().equals(product.getSellerProfileId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not owner of product");
         }
@@ -90,7 +90,7 @@ public class ProductService {
         boolean ok = false;
         for (var v : variants) {
             var invOpt = inventoryRepo.findByProductVariantId(v.getId());
-            if (invOpt.isPresent() && invOpt.get().getQuantity() > 0) {
+            if (invOpt.isPresent() && invOpt.get().getOnHandQuantity() > 0) {
                 ok = true; break;
             }
         }
@@ -99,12 +99,12 @@ public class ProductService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot publish without at least one in-stock variant");
         }
 
-        product.setPublished(true);
+        product.publish();
         productRepo.save(product);
     }
 
     @Transactional(readOnly = true)
     public java.util.List<Product> listPublishedProducts() {
-        return productRepo.findByPublishedTrue();
+        return productRepo.findByStatus("PUBLISHED");
     }
 }

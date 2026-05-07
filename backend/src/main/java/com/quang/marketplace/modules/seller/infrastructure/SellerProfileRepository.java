@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface SellerProfileRepository extends JpaRepository<SellerProfile, Long> {
-    Optional<SellerProfile> findByUserIdAndActiveTrue(Long userId);
-    boolean existsByUserIdAndActiveTrue(Long userId);
+    Optional<SellerProfile> findByUserIdAndStatus(Long userId, String status);
+    boolean existsByUserIdAndStatus(Long userId, String status);
 }

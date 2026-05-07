@@ -34,7 +34,7 @@ async function loadProducts(){
     const list = await api('/products', {method:'GET'});
     const container = document.getElementById('product-list');
     if (!list || list.length===0) { container.innerText = 'No products'; return }
-    container.innerHTML = list.map(p => `<div><strong>${p.title}</strong> - ${p.description}</div>`).join('\n');
+    container.innerHTML = list.map(p => `<div><strong>${p.name}</strong> - ${p.description}</div>`).join('\n');
   }catch(e){ document.getElementById('product-list').innerText = 'Failed to load: ' + e.message }
 }
 

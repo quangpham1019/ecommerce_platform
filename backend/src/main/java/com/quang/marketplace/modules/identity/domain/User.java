@@ -3,8 +3,9 @@ package com.quang.marketplace.modules.identity.domain;
 import jakarta.persistence.*;
 import java.time.Instant;
 
+//TODO: add UserStatus enum and use it for status field
 @Entity
-@Table(name = "users")
+@Table(name = "user_accounts")
 public class User {
 
     @Id
@@ -16,6 +17,15 @@ public class User {
 
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
+
+    @Column(name = "first_name")
+    private String firstName;
+
+    @Column(name = "last_name")
+    private String lastName;
+
+    @Column(name = "status", nullable = false)
+    private String status = "ACTIVE";
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -53,6 +63,15 @@ public class User {
 
     public String getPasswordHash() {
         return passwordHash;
+    }
+
+    public String getFirstName() { return firstName; }
+    public String getLastName() { return lastName; }
+    public String getStatus() { return status; }
+
+    public void updateProfile(String firstName, String lastName) {
+        this.firstName = firstName;
+        this.lastName = lastName;
     }
 
 }

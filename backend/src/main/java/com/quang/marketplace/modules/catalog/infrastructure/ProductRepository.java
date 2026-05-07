@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findBySellerProfileId(Long sellerProfileId);
-    List<Product> findByPublishedTrue();
+    List<Product> findByStatus(String status);
 }

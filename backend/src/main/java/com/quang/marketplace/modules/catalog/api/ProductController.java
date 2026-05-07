@@ -22,12 +22,12 @@ public class ProductController {
         this.currentUserProvider = currentUserProvider;
     }
 
-    record CreateProductRequest(String title, String description) {}
+    record CreateProductRequest(String name, String description) {}
 
     @PostMapping
     public ResponseEntity<?> create(@RequestBody CreateProductRequest req) {
         Long userId = currentUserProvider.getCurrentUserId();
-        Product p = service.createProduct(userId, req.title(), req.description());
+        Product p = service.createProduct(userId, req.name(), req.description());
         return ResponseEntity.created(URI.create("/api/products/" + p.getId())).body(p.getId());
     }
 
@@ -53,7 +53,7 @@ public class ProductController {
     @GetMapping
     public ResponseEntity<?> listPublished() {
         var products = service.listPublishedProducts();
-        var views = products.stream().map(p -> new ProductView(p.getId(), p.getTitle(), p.getDescription(), p.isPublished())).toList();
+        var views = products.stream().map(p -> new ProductView(p.getId(), p.getName(), p.getDescription(), p.isPublished())).toList();
         return ResponseEntity.ok(views);
     }
 }

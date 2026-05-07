@@ -5,6 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface InventoryRepository extends JpaRepository<ProductVariantInventory, Long> {
+public interface ProductVariantInventoryRepository extends JpaRepository<ProductVariantInventory, Long> {
     Optional<ProductVariantInventory> findByProductVariantId(Long variantId);
 }
