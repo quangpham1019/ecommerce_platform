@@ -74,4 +74,11 @@ public class User {
         this.lastName = lastName;
     }
 
+    public void updatePasswordHash(String newPasswordHash) {
+        if (newPasswordHash == null || newPasswordHash.isBlank()) {
+            throw new IllegalArgumentException("Password hash is required");
+        }
+        this.passwordHash = newPasswordHash;
+    }
+
 }

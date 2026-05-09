@@ -15,6 +15,7 @@ import jakarta.transaction.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -33,18 +34,31 @@ public class AuthSecurityTests extends AbstractIntegrationTest {
     PasswordEncoder passwordEncoder;
 
     @Test
-    public void login_returns_set_cookie_header() throws Exception {
+    public void login_creates_authenticated_session() throws Exception {
         String email = "tuser" + System.currentTimeMillis() + "@example.com";
-        String body = String.format("{\"email\":\"%s\",\"password\":\"password123\"}", email);
+        String body = String.format(
+                "{\"email\":\"%s\",\"password\":\"password123\"}",
+                email
+        );
 
-        mvc.perform(post("/api/register").contentType("application/json").content(body))
-                .andExpect(status().isCreated());
+        mvc.perform(post("/api/register")
+                .contentType("application/json")
+                .content(body))
+            .andExpect(status().isCreated());
 
-        var resp = mvc.perform(post("/api/login").contentType("application/json").content(body)).andReturn().getResponse();
-        String setCookie = resp.getHeader("Set-Cookie");
-        assertNotNull(setCookie, "Expected Set-Cookie header on login");
-        assertTrue(setCookie.contains("JSESSIONID"));
-        assertTrue(setCookie.toLowerCase().contains("httponly"));
+        var loginResult = mvc.perform(post("/api/login")
+                .contentType("application/json")
+                .content(body))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        MockHttpSession session =
+                (MockHttpSession) loginResult.getRequest().getSession(false);
+
+        assertNotNull(session);
+
+        mvc.perform(get("/api/me").session(session))
+            .andExpect(status().isOk());
     }
 
     @Test
@@ -55,7 +69,7 @@ public class AuthSecurityTests extends AbstractIntegrationTest {
 
         // invalid content-type
         mvc.perform(post("/api/login").contentType("text/plain").content("plain text"))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isUnsupportedMediaType());
     }
 
     @Test
@@ -102,7 +116,8 @@ public class AuthSecurityTests extends AbstractIntegrationTest {
         var userOpt = userRepository.findByEmail(email.toLowerCase());
         assertThat(userOpt).isPresent();
         User u = userOpt.get();
-        u = userRepository.save(new User(u.getEmail(), passwordEncoder.encode("new-secret")));
+        u.updatePasswordHash(passwordEncoder.encode("new-secret"));
+        u = userRepository.save(u);
 
         // attempt login with old password should fail
         mvc.perform(post("/api/login").contentType("application/json").content(body))

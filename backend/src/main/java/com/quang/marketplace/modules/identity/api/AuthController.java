@@ -3,6 +3,8 @@ package com.quang.marketplace.modules.identity.api;
 import com.quang.marketplace.modules.identity.application.AuthService;
 import com.quang.marketplace.modules.identity.api.AuthUserResponse;
 import com.quang.marketplace.modules.identity.api.RegisterRequest;
+import com.quang.marketplace.shared.error.UnauthenticatedException;
+import com.quang.marketplace.shared.security.CurrentUserProvider;
 import com.quang.marketplace.shared.security.UserPrincipal;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -18,9 +20,11 @@ import org.springframework.web.server.ResponseStatusException;
 public class AuthController {
 
     private final AuthService authService;
+    private final CurrentUserProvider currentUserProvider;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, CurrentUserProvider currentUserProvider) {
         this.authService = authService;
+        this.currentUserProvider = currentUserProvider;
     }
 
     @PostMapping("/register")
@@ -36,16 +40,11 @@ public class AuthController {
 
     @GetMapping("/me")
     public AuthUserResponse me() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated() || authentication instanceof AnonymousAuthenticationToken) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-        }
 
-        Object principal = authentication.getPrincipal();
-        if (principal instanceof UserPrincipal userPrincipal) {
-            return new AuthUserResponse(userPrincipal.getId(), userPrincipal.getEmail());
-        }
+            UserPrincipal userPrincipal = currentUserProvider
+                .getCurrentUser()
+                .orElseThrow(() -> new UnauthenticatedException());
 
-        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        return new AuthUserResponse(userPrincipal.getId(), userPrincipal.getEmail());
     }
 }

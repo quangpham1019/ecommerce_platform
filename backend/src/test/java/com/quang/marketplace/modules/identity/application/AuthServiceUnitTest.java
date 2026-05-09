@@ -1,9 +1,10 @@
 package com.quang.marketplace.modules.identity.application;
 
+import com.quang.marketplace.shared.error.DuplicateEmailException;
+import com.quang.marketplace.shared.error.InvalidCredentialsException;
 import com.quang.marketplace.modules.identity.api.RegisterRequest;
 import com.quang.marketplace.modules.identity.domain.User;
 import com.quang.marketplace.modules.identity.infrastructure.UserRepository;
-import com.quang.marketplace.shared.error.BusinessRuleException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -61,7 +62,7 @@ public class AuthServiceUnitTest {
         RegisterRequest req = new RegisterRequest("dup@example.com", "password123");
         when(userRepository.existsByEmail(anyString())).thenReturn(true);
 
-        assertThrows(BusinessRuleException.class, () -> authService.register(req));
+        assertThrows(DuplicateEmailException.class, () -> authService.register(req));
     }
 
     @Test
@@ -69,7 +70,7 @@ public class AuthServiceUnitTest {
         RegisterRequest req = new RegisterRequest("nope@example.com", "password123");
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
 
-        assertThrows(BusinessRuleException.class, () -> authService.login(req, mock(HttpServletRequest.class)));
+        assertThrows(InvalidCredentialsException.class, () -> authService.login(req, mock(HttpServletRequest.class)));
     }
 
     @Test
@@ -79,7 +80,7 @@ public class AuthServiceUnitTest {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(u));
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
 
-        assertThrows(BusinessRuleException.class, () -> authService.login(req, mock(HttpServletRequest.class)));
+        assertThrows(InvalidCredentialsException.class, () -> authService.login(req, mock(HttpServletRequest.class)));
     }
 
     @Test

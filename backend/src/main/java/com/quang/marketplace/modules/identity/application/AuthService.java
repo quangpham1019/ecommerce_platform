@@ -4,7 +4,9 @@ import com.quang.marketplace.modules.identity.api.AuthUserResponse;
 import com.quang.marketplace.modules.identity.api.RegisterRequest;
 import com.quang.marketplace.modules.identity.domain.User;
 import com.quang.marketplace.modules.identity.infrastructure.UserRepository;
-import com.quang.marketplace.shared.error.BusinessRuleException;
+import com.quang.marketplace.shared.error.DuplicateEmailException;
+import com.quang.marketplace.shared.error.InvalidCredentialsException;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -12,6 +14,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -35,7 +38,7 @@ public class AuthService {
         String normalizedEmail = request.email().trim().toLowerCase();
 
         if (userRepository.existsByEmail(normalizedEmail)) {
-            throw new BusinessRuleException("Email is already registered");
+            throw new DuplicateEmailException();
         }
 
         String passwordHash = passwordEncoder.encode(request.password());
@@ -51,12 +54,12 @@ public class AuthService {
 
         var userOpt = userRepository.findByEmail(normalizedEmail);
         if (userOpt.isEmpty()) {
-            throw new BusinessRuleException("Invalid credentials");
+            throw new InvalidCredentialsException("Invalid credentials");
         }
 
         var user = userOpt.get();
         if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
-            throw new BusinessRuleException("Invalid credentials");
+            throw new InvalidCredentialsException("Invalid credentials");
         }
 
         // Establish a session-based Authentication where principal is UserPrincipal.
@@ -75,5 +78,13 @@ public class AuthService {
         );
 
         return new AuthUserResponse(user.getId(), user.getEmail());
+    }
+
+    @Transactional
+    public void changePassword(String email, String rawNewPassword) {
+        User user = userRepository.findByEmail(email.toLowerCase())
+                .orElseThrow();
+
+        user.updatePasswordHash(passwordEncoder.encode(rawNewPassword));
     }
 }

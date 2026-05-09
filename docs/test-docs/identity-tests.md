@@ -18,7 +18,7 @@ This document enumerates the test classes and individual test cases under `modul
 
 - [AuthIntegrationTest.java](backend/src/test/java/com/quang/marketplace/modules/identity/AuthIntegrationTest.java#L1-L200)
   - `registerLoginLogoutFlow`: full register → login → logout flow, verifies JSON responses and session handling.
-  - `duplicateEmailRegistrationFails`: registering the same email twice fails (BusinessRuleException surfaced as error).
+  - `duplicateEmailRegistrationFails`: registering the same email twice fails (DuplicateEmailException surfaced as error).
   - `login_creates_security_context_in_session_and_logout_invalidates`: login populates session; logout invalidates it and subsequent protected endpoints return 401.
 
 - [AuthSecurityTests.java](backend/src/test/java/com/quang/marketplace/modules/identity/AuthSecurityTests.java#L1-L200)
