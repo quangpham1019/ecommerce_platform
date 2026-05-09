@@ -35,7 +35,7 @@ public class ProductService {
 
     @Transactional
     public Product createProduct(Long userId, String title, String description) {
-        var sellerOpt = sellerRepo.findByUserIdAndStatus(userId, "ACTIVE");
+        var sellerOpt = sellerRepo.findByUserIdAndStatus(userId, com.quang.marketplace.modules.seller.domain.SellerProfileStatus.ACTIVE);
         if (sellerOpt.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User has no active seller profile");
         }
@@ -50,7 +50,7 @@ public class ProductService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
 
         // ownership
-        var sellerOpt = sellerRepo.findByUserIdAndStatus(userId, "ACTIVE");
+        var sellerOpt = sellerRepo.findByUserIdAndStatus(userId, com.quang.marketplace.modules.seller.domain.SellerProfileStatus.ACTIVE);
         if (sellerOpt.isEmpty() || !sellerOpt.get().getId().equals(product.getSellerProfileId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not owner of product");
         }
@@ -80,7 +80,7 @@ public class ProductService {
         Product product = productRepo.findById(productId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
 
-        var sellerOpt = sellerRepo.findByUserIdAndStatus(userId, "ACTIVE");
+        var sellerOpt = sellerRepo.findByUserIdAndStatus(userId, com.quang.marketplace.modules.seller.domain.SellerProfileStatus.ACTIVE);
         if (sellerOpt.isEmpty() || !sellerOpt.get().getId().equals(product.getSellerProfileId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not owner of product");
         }

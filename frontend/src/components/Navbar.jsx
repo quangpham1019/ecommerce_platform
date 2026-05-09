@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { useCart } from '../contexts/CartContext'
 
 export default function Navbar(){
-  const { isAuthenticated, user, logout } = useAuth()
+  const { isAuthenticated, user, sellerProfile, logout } = useAuth()
   const { items } = useCart()
   const count = items.reduce((s,i)=>s + (i.qty||0), 0)
 
@@ -14,7 +14,7 @@ export default function Navbar(){
         <Link to="/" className="text-lg font-semibold">Marketplace</Link>
         <nav className="flex items-center gap-4">
           <Link to="/">Browse</Link>
-          {isAuthenticated && <Link to="/seller">Seller</Link>}
+          {isAuthenticated && sellerProfile && <Link to="/seller">Seller</Link>}
           <Link to="/cart">Cart ({count})</Link>
           {isAuthenticated ? (
             <>

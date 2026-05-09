@@ -18,8 +18,8 @@ function ProtectedRoute({children}){
 }
 
 function SellerRoute({children}){
-  const { isAuthenticated, user } = useAuth()
-  return (isAuthenticated && user?.isSeller) ? children : <Navigate to="/" replace />
+  const { isAuthenticated, isSeller } = useAuth()
+  return (isAuthenticated && isSeller) ? children : <Navigate to="/" replace />
 }
 
 export default function App(){

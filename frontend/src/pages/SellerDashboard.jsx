@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { Link } from 'react-router-dom'
 
 export default function SellerDashboard(){
-  const { isAuthenticated, user } = useAuth()
+  const { isAuthenticated, isSeller } = useAuth()
 
   if (!isAuthenticated) {
     return (
@@ -17,13 +17,13 @@ export default function SellerDashboard(){
     )
   }
 
-  if (!user?.isSeller) {
+  if (!isSeller) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-semibold mb-2">You don't have a seller profile yet</h2>
           <p className="mb-4 text-sm text-gray-600">Create a seller profile to list products and manage orders.</p>
-          <Link to="/profile" className="bg-green-600 text-white px-4 py-2 rounded">Register as a seller (placeholder)</Link>
+          <Link to="/profile" className="bg-green-600 text-white px-4 py-2 rounded">Create seller profile</Link>
         </div>
       </div>
     )
