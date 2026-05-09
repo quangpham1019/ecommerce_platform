@@ -6,6 +6,7 @@ import com.quang.marketplace.modules.catalog.domain.ProductVariant;
 import com.quang.marketplace.modules.catalog.infrastructure.InventoryRepository;
 import com.quang.marketplace.modules.catalog.infrastructure.ProductRepository;
 import com.quang.marketplace.modules.catalog.infrastructure.ProductVariantRepository;
+import com.quang.marketplace.modules.seller.domain.SellerProfileStatus;
 import com.quang.marketplace.modules.seller.infrastructure.SellerProfileRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -35,7 +36,7 @@ public class ProductService {
 
     @Transactional
     public Product createProduct(Long userId, String title, String description) {
-        var sellerOpt = sellerRepo.findByUserIdAndStatus(userId, com.quang.marketplace.modules.seller.domain.SellerProfileStatus.ACTIVE);
+        var sellerOpt = sellerRepo.findByUserIdAndStatus(userId, SellerProfileStatus.ACTIVE);
         if (sellerOpt.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User has no active seller profile");
         }
@@ -50,7 +51,7 @@ public class ProductService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
 
         // ownership
-        var sellerOpt = sellerRepo.findByUserIdAndStatus(userId, com.quang.marketplace.modules.seller.domain.SellerProfileStatus.ACTIVE);
+        var sellerOpt = sellerRepo.findByUserIdAndStatus(userId, SellerProfileStatus.ACTIVE);
         if (sellerOpt.isEmpty() || !sellerOpt.get().getId().equals(product.getSellerProfileId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not owner of product");
         }
@@ -80,7 +81,7 @@ public class ProductService {
         Product product = productRepo.findById(productId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
 
-        var sellerOpt = sellerRepo.findByUserIdAndStatus(userId, com.quang.marketplace.modules.seller.domain.SellerProfileStatus.ACTIVE);
+        var sellerOpt = sellerRepo.findByUserIdAndStatus(userId, SellerProfileStatus.ACTIVE);
         if (sellerOpt.isEmpty() || !sellerOpt.get().getId().equals(product.getSellerProfileId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not owner of product");
         }
