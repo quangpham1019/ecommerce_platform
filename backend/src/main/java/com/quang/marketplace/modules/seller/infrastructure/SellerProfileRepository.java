@@ -9,5 +9,5 @@ import java.util.Optional;
 public interface SellerProfileRepository extends JpaRepository<SellerProfile, Long> {
     Optional<SellerProfile> findByUserId(Long userId);
     Optional<SellerProfile> findByUserIdAndStatus(Long userId, SellerProfileStatus status);
-    boolean existsByUserIdAndStatus(Long userId, SellerProfileStatus status);
+    boolean existsByUserId(Long userId);
 }

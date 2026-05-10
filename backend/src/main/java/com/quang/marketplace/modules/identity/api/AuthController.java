@@ -1,19 +1,13 @@
 package com.quang.marketplace.modules.identity.api;
 
 import com.quang.marketplace.modules.identity.application.AuthService;
-import com.quang.marketplace.modules.identity.api.AuthUserResponse;
-import com.quang.marketplace.modules.identity.api.RegisterRequest;
 import com.quang.marketplace.shared.error.UnauthenticatedException;
 import com.quang.marketplace.shared.security.CurrentUserProvider;
 import com.quang.marketplace.shared.security.UserPrincipal;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api")

@@ -16,11 +16,48 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @org.springframework.transaction.annotation.Transactional
-public class SellerProfileIntegrationTest extends com.quang.marketplace.AbstractIntegrationTest {
+public class SellerProfileApiTest extends com.quang.marketplace.AbstractIntegrationTest {
 
     @Autowired
     MockMvc mvc;
 
+    @Test
+    public void invalidInput_returnsBadRequest() throws Exception {
+        String email = "apiuser" + System.currentTimeMillis() + "@example.com";
+        String userBody = String.format("{\"email\":\"%s\",\"password\":\"password123\"}", email);
+
+        mvc.perform(post("/api/register").contentType("application/json").content(userBody))
+                .andExpect(status().isCreated());
+
+        MockHttpSession session = new MockHttpSession();
+        mvc.perform(post("/api/login").session(session).contentType("application/json").content(userBody))
+                .andExpect(status().isOk());
+
+        String badBody = "{\"displayName\":\"\"}"; // blank displayName
+        mvc.perform(post("/api/seller-profiles").session(session).contentType("application/json").content(badBody))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void create_returnsCreated_andJson() throws Exception {
+        String email = "apiuser2" + System.currentTimeMillis() + "@example.com";
+        String userBody = String.format("{\"email\":\"%s\",\"password\":\"password123\"}", email);
+
+        mvc.perform(post("/api/register").contentType("application/json").content(userBody))
+                .andExpect(status().isCreated());
+
+        MockHttpSession session = new MockHttpSession();
+        mvc.perform(post("/api/login").session(session).contentType("application/json").content(userBody))
+                .andExpect(status().isOk());
+
+        String createBody = "{\"displayName\":\"My API Shop\",\"bio\":\"desc\"}";
+        mvc.perform(post("/api/seller-profiles").session(session).contentType("application/json").content(createBody))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.displayName").value("My API Shop"))
+                .andExpect(jsonPath("$.status").value("ACTIVE"));
+    }
+
+    
     @Test
     public void unauthorizedUserCannotAccessSellerProfileEndpoints() throws Exception {
         mvc.perform(get("/api/seller-profiles/me"))

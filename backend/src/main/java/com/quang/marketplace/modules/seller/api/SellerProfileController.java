@@ -1,15 +1,10 @@
 package com.quang.marketplace.modules.seller.api;
 
-import com.quang.marketplace.modules.seller.domain.SellerProfile;
-import com.quang.marketplace.modules.seller.infrastructure.SellerProfileRepository;
+import com.quang.marketplace.modules.seller.application.SellerProfileService;
 import com.quang.marketplace.shared.security.CurrentUserProvider;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
-
-import org.springframework.http.HttpStatus;
 
 import java.net.URI;
 
@@ -17,57 +12,34 @@ import java.net.URI;
 @RequestMapping("/api/seller-profiles")
 public class SellerProfileController {
 
-    private final SellerProfileRepository repo;
     private final CurrentUserProvider currentUserProvider;
+    private final SellerProfileService service;
 
-    public SellerProfileController(SellerProfileRepository repo, CurrentUserProvider currentUserProvider) {
-        this.repo = repo;
+    public SellerProfileController(CurrentUserProvider currentUserProvider, SellerProfileService service) {
+        this.service = service;
         this.currentUserProvider = currentUserProvider;
     }
-
-    record CreateSellerProfileRequest(@NotBlank String displayName, String bio) {}
-    record UpdateSellerProfileRequest(@NotBlank String displayName, String bio) {}
-    record SellerProfileResponse(Long id, String displayName, String bio, String status) {}
 
     @PostMapping
     public ResponseEntity<?> create(@Valid @RequestBody CreateSellerProfileRequest req) {
 
         Long userId = currentUserProvider.getCurrentUserId();
 
-        repo.findByUserId(userId)
-                .filter(SellerProfile::isActive)
-                .ifPresent(profile -> {
-                    throw new ResponseStatusException(HttpStatus.CONFLICT, "User already has an active seller profile");
-                });
+        SellerProfileResponse response = service.createSellerProfile(userId, req);
 
-        SellerProfile p = new SellerProfile(userId, req.displayName());
-        p.updateProfile(req.displayName(), req.bio());
-        p.activate();
-        SellerProfile saved = repo.save(p);
-
-        return ResponseEntity.created(URI.create("/api/seller-profiles/" + saved.getId())).body(saved.getId());
+        return ResponseEntity.created(URI.create("/api/seller-profiles/" + response.id())).body(response);
     }
 
     @GetMapping("/me")
     public SellerProfileResponse getCurrentSellerProfile() {
         Long userId = currentUserProvider.getCurrentUserId();
-        SellerProfile profile = repo.findByUserId(userId)
-                .filter(SellerProfile::isActive)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Seller profile not found"));
-
-        return new SellerProfileResponse(profile.getId(), profile.getDisplayName(), profile.getBio(), profile.getStatus().name());
+        return service.getMySellerProfile(userId);
     }
 
     @PatchMapping("/me")
     public SellerProfileResponse updateCurrentSellerProfile(@Valid @RequestBody UpdateSellerProfileRequest req) {
         Long userId = currentUserProvider.getCurrentUserId();
-        SellerProfile profile = repo.findByUserId(userId)
-                .filter(SellerProfile::isActive)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Seller profile not found"));
-
-        profile.updateProfile(req.displayName(), req.bio());
-        SellerProfile updated = repo.save(profile);
-
-        return new SellerProfileResponse(updated.getId(), updated.getDisplayName(), updated.getBio(), updated.getStatus().name());
+       
+        return service.updateSellerProfile(userId, req);
     }
 }
