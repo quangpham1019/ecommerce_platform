@@ -8,6 +8,7 @@ erDiagram
     SELLER_PROFILE ||--o{ PRODUCT : lists
     PRODUCT ||--o{ PRODUCT_VARIANT : has
     PRODUCT_VARIANT ||--|| INVENTORY_ITEM : tracks
+    PRODUCT_VARIANT ||--o{ PRODUCT_VARIANT_OPTION : has
     USER ||--|| CART : owns
     CART ||--o{ CART_ITEM : contains
     PRODUCT_VARIANT ||--o{ CART_ITEM : references
@@ -28,6 +29,7 @@ First expected tables:
 - `products`
 - `product_variants`
 - `inventory_items`
+ - `product_variant_options` (new)
 - `carts`
 - `cart_items`
 - `checkouts`

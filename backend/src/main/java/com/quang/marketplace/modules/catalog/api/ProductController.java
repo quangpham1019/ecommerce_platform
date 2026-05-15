@@ -22,22 +22,18 @@ public class ProductController {
         this.currentUserProvider = currentUserProvider;
     }
 
-    record CreateProductRequest(String name, String description) {}
-
     @PostMapping
     public ResponseEntity<?> create(@RequestBody CreateProductRequest req) {
         Long userId = currentUserProvider.getCurrentUserId();
-        Product p = service.createProduct(userId, req.name(), req.description());
+        Product p = service.createProduct(userId, req);
         return ResponseEntity.created(URI.create("/api/products/" + p.getId())).body(p.getId());
     }
-
-    record AddVariantRequest(String sku, BigDecimal price, int quantity) {}
 
     @PostMapping("/{id}/variants")
     public ResponseEntity<?> addVariant(@PathVariable("id") Long productId,
                                         @RequestBody AddVariantRequest req) {
         Long userId = currentUserProvider.getCurrentUserId();
-        ProductVariant v = service.addVariant(userId, productId, req.sku(), req.price(), req.quantity());
+        ProductVariant v = service.addVariant(userId, productId, req);
         return ResponseEntity.created(URI.create("/api/products/" + productId + "/variants/" + v.getId())).body(v.getId());
     }
 

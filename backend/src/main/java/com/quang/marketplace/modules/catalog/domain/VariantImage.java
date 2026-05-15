@@ -29,10 +29,8 @@ public class VariantImage {
 
     protected VariantImage() {}
 
-    public VariantImage(ProductVariant productVariant, String imageUrl, String altText, int sortOrder) {
-        if (productVariant == null) {
-            throw new IllegalArgumentException("ProductVariant is required");
-        }
+    public VariantImage(String imageUrl, String altText, int sortOrder) {
+
         if (imageUrl == null || imageUrl.isBlank()) {
             throw new IllegalArgumentException("Image URL is required");
         }
@@ -40,7 +38,6 @@ public class VariantImage {
             throw new IllegalArgumentException("Sort order cannot be negative");
         }
 
-        this.productVariant = productVariant;
         this.imageUrl = imageUrl;
         this.altText = altText == null || altText.isBlank() ? null : altText;
         this.sortOrder = sortOrder;

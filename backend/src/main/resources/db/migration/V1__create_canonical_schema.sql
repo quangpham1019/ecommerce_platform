@@ -357,4 +357,17 @@ CREATE TABLE IF NOT EXISTS payments (
     ON UPDATE CASCADE
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 17) Product variant options (for extensible variant attributes)
+CREATE TABLE product_variant_options (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    product_variant_id BIGINT NOT NULL,
+    option_name VARCHAR(255) NOT NULL,
+    option_value VARCHAR(255) NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_product_variant_options_variant
+        FOREIGN KEY (product_variant_id)
+        REFERENCES product_variants(id)
+        ON DELETE CASCADE
+);
 -- End of migration

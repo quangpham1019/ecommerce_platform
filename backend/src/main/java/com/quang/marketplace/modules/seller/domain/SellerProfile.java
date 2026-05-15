@@ -75,6 +75,24 @@ public class SellerProfile {
         return this.status == SellerProfileStatus.ACTIVE;
     }
 
+    public String getCode() {
+        // simple code generation based on display name and id (for SKU prefix)
+        // Alo Asian Kitchen -> AAK-{id}
+        // Tropical Tea House -> TTH-{id}
+
+        // split by non-alphanumeric, take first char of each word, uppercase, append id
+        String alphaNumericDisplayName = displayName.replaceAll("[^A-Z0-9]+", " ").trim().toUpperCase(); // keep only letters and digits
+        String[] parts = alphaNumericDisplayName.split("\\s+");
+        StringBuilder codeBuilder = new StringBuilder();
+        
+        for (String part : parts) {
+            if (!part.isEmpty()) {
+                codeBuilder.append(part.charAt(0));
+            }
+        }
+        return codeBuilder.append("-").append(id).toString();
+    }
+
     // ===== Lifecycle =====
 
     @PrePersist

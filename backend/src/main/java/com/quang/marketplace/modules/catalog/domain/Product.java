@@ -5,6 +5,8 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.quang.marketplace.shared.error.ValidationException;
+
 //TODO: add ProductStatus enum and use it for status field
 @Entity
 @Table(name = "products")
@@ -44,10 +46,25 @@ public class Product {
 
     protected Product() {}
 
-    public Product(Long sellerProfileId, String name, String description) {
+    private Product(Long sellerProfileId, String name, String description, String slug) {
+
+        if (sellerProfileId == null) {
+            throw new ValidationException("Seller profile ID is required");
+        }
+        if (name == null || name.isBlank()) {
+            throw new ValidationException("Product name is required");
+        }
+        if (description == null || description.isBlank()) {
+            throw new ValidationException("Product description is required");
+        }
+        if (slug == null || slug.isBlank()) {
+            throw new ValidationException("Product slug is required");
+        }
+
         this.sellerProfileId = sellerProfileId;
         this.name = name;
         this.description = description;
+        this.slug = slug;
     }
 
     @PrePersist
@@ -62,6 +79,10 @@ public class Product {
         this.updatedAt = Instant.now();
     }
 
+    public static Product createDraft(Long sellerProfileId, String name, String description, String slug) {
+        return new Product(sellerProfileId, name, description, slug);
+    }
+
     public void addImage(ProductImage image) {
         image.assignToProduct(this);
         images.add(image);
@@ -74,28 +95,20 @@ public class Product {
     public boolean isPublished() { return "PUBLISHED".equalsIgnoreCase(status.name()); }
     public List<ProductVariant> getVariants() { return variants; }
     public List<ProductImage> getProductImages() { return images; }
-    public String getStatus() { return status.name(); }
+    public ProductStatus getStatus() { return status; }
 
     public void publish() {
         if (name == null || name.isBlank()) {
-            throw new IllegalStateException("Published product must have a name");
+            throw new ValidationException("Published product must have a name");
         }
 
         if (description == null || description.isBlank()) {
-            throw new IllegalStateException("Published product must have a description");
+            throw new ValidationException("Published product must have a description");
         }
 
         if (variants.isEmpty()) {
-            throw new IllegalStateException("Published product must have at least one variant");
+            throw new ValidationException("Published product must have at least one variant");
         }
-
-        // TODO: add inventory check in application service to ensure at least one variant has available inventory before allowing publish
-        // boolean hasAvailableVariant = variants.stream()
-        //     .anyMatch(ProductVariant::hasAvailableInventory);
-
-        // if (!hasAvailableVariant) {
-        //     throw new IllegalStateException("Published product must have at least one variant with available inventory");
-        // }
 
         this.status = ProductStatus.PUBLISHED;
     }
@@ -105,12 +118,25 @@ public class Product {
     }
 
     public void updateDetails(String name, String description) {
+        if (name == null || name.isBlank()) {
+            throw new ValidationException("Product name is required");
+        }
+
+        if (description == null || description.isBlank()) {
+            throw new ValidationException("Product description is required");
+        }
+
         this.name = name;
         this.description = description;
     }
 
     public void addVariant(ProductVariant variant) {
+        if (variant == null) {
+            throw new ValidationException("Product variant is required");
+        }
+
         variants.add(variant);
         variant.assignToProduct(this);
     }
+
 }
