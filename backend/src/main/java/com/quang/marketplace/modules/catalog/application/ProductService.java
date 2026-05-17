@@ -18,12 +18,9 @@ import com.quang.marketplace.shared.error.ForbiddenOperationException;
 import com.quang.marketplace.shared.error.ResourceNotFoundException;
 import com.quang.marketplace.shared.util.SlugifyUtil;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -94,8 +91,8 @@ public class ProductService {
         }
 
         // SKU uniqueness within seller scope: check other variants of seller's products
-        if (variantRepo.existsByProductSellerProfileIdAndSkuIgnoreCase(product.getSellerProfileId(), sku)) {
-            throw new ConflictException("SKU already exists for this seller");
+        if (variantRepo.existsByProductIdAndSkuIgnoreCase(product.getId(), sku)) {
+            throw new ConflictException("SKU already exists for this product");
         }
 
         ProductVariant variant = new ProductVariant(sku, request.price());
@@ -127,7 +124,8 @@ public class ProductService {
         for (var v : variants) {
             var invOpt = inventoryRepo.findByProductVariant_Id(v.getId());
             if (invOpt.isPresent() && invOpt.get().getOnHandQuantity() > 0) {
-                haveAtleastOneVariantWithAvailableInventory = true; break;
+                haveAtleastOneVariantWithAvailableInventory = true; 
+                break;
             }
         }
 

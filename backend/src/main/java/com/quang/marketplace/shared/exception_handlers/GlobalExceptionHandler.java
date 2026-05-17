@@ -22,6 +22,15 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.UNAUTHORIZED, ex, request);
     }
 
+    
+    @ExceptionHandler(UnauthenticatedException.class)
+    public ResponseEntity<ApiErrorResponse> handleUnauthenticated(
+            UnauthenticatedException ex,
+            HttpServletRequest request
+    ) {
+        return build(HttpStatus.UNAUTHORIZED, ex, request);
+    }
+
     @ExceptionHandler(ForbiddenOperationException.class)
     public ResponseEntity<ApiErrorResponse> handleForbidden(
             ForbiddenOperationException ex,
@@ -38,7 +47,7 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.NOT_FOUND, ex, request);
     }
 
-    @ExceptionHandler(ConflictException.class)
+    @ExceptionHandler({ConflictException.class, BusinessRuleException.class})
     public ResponseEntity<ApiErrorResponse> handleConflict(
             ConflictException ex,
             HttpServletRequest request
@@ -46,7 +55,7 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.CONFLICT, ex, request);
     }
 
-    @ExceptionHandler({ValidationException.class, BusinessRuleException.class})
+    @ExceptionHandler(ValidationException.class)
     public ResponseEntity<ApiErrorResponse> handleBadRequest(
             RuntimeException ex,
             HttpServletRequest request
@@ -70,11 +79,4 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(body);
     }
 
-    @ExceptionHandler(UnauthenticatedException.class)
-    public ResponseEntity<ApiErrorResponse> handleUnauthenticated(
-            UnauthenticatedException ex,
-            HttpServletRequest request
-    ) {
-        return build(HttpStatus.UNAUTHORIZED, ex, request);
-    }
 }

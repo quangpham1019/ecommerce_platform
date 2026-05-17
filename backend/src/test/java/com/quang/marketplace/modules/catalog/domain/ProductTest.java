@@ -80,7 +80,7 @@ public class ProductTest {
     @Test
     void publish_failsWithoutVariant() {
         Product p = Product.createDraft(10L, "Name", "Desc", "name-10");
-        org.junit.jupiter.api.Assertions.assertThrows(ValidationException.class, p::publish);
+        assertThrows(ValidationException.class, p::publish);
     }
 
     @Test

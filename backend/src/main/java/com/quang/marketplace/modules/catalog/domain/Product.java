@@ -96,6 +96,7 @@ public class Product {
     public List<ProductVariant> getVariants() { return variants; }
     public List<ProductImage> getProductImages() { return images; }
     public ProductStatus getStatus() { return status; }
+    public String getSlug() { return slug; }
 
     public void publish() {
         if (name == null || name.isBlank()) {

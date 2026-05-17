@@ -101,8 +101,8 @@ CREATE TABLE IF NOT EXISTS product_variants (
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
-  UNIQUE KEY uq_product_variants_sku (sku),
-  INDEX idx_product_variants_product_id (product_id),
+UNIQUE KEY uq_product_variants_product_sku (product_id, sku),
+INDEX idx_product_variants_product_id (product_id),
   CONSTRAINT fk_product_variants_products
     FOREIGN KEY (product_id)
     REFERENCES products(id)

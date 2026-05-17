@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -40,19 +41,26 @@ public class ProductVariantRepositoryIT extends AbstractIntegrationTest {
     UserRepository userRepo;
 
     @Test
-    void saveVariant_requiresProduct() {
+    void saveVariant_persistsProductId() {
+        Product product = Product.createDraft(
+            1L,
+            "Product " + System.nanoTime(),
+            "Description",
+            "variant-product-id" + "-" + System.nanoTime()
+        );
+
         ProductVariant variant = new ProductVariant(
-            "SKU-1",
+            "SKU-PRODUCT-ID",
             new BigDecimal("10.00")
         );
 
-        assertThrows(
-            DataIntegrityViolationException.class,
-            () -> variantRepo.saveAndFlush(variant)
-        );
+        product.addVariant(variant);
 
-        // This test may not be needed if constructor already requires product.
-        // DB-level test is mainly useful if product_id constraint is involved.
+        productRepo.saveAndFlush(product);
+
+        ProductVariant reloaded = variantRepo.findById(variant.getId()).orElseThrow();
+
+        assertEquals(product.getId(), reloaded.getProduct().getId());
     }
 
     @Test
@@ -141,7 +149,7 @@ public class ProductVariantRepositoryIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void existsByProductSellerProfileIdAndSkuIgnoreCase_returnsTrueForExistingSellerSku() {
+    void existsByProductIdAndSkuIgnoreCase_returnsTrueForExistingProductSku() {
         User user = new User(
             "variant-query@example.com",
             "password123"
@@ -169,11 +177,11 @@ public class ProductVariantRepositoryIT extends AbstractIntegrationTest {
         );
 
         product.addVariant(variant);
-        productRepo.save(product);
+        productRepo.saveAndFlush(product);
 
         boolean exists = variantRepo
-            .existsByProductSellerProfileIdAndSkuIgnoreCase(
-                seller.getId(),
+            .existsByProductIdAndSkuIgnoreCase(
+                product.getId(),
                 "sku-abc"
             );
 
@@ -181,9 +189,9 @@ public class ProductVariantRepositoryIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void duplicateSkuWithinSameSeller_isRejectedByDatabase() {
+    void duplicateSkuWithinSameProduct_isRejectedByDatabase() {
         User user = new User(
-            "duplicate-sku@example.com",
+            "duplicate-sku" + System.nanoTime() + "@example.com",
             "password123"
         );
 
@@ -191,7 +199,7 @@ public class ProductVariantRepositoryIT extends AbstractIntegrationTest {
 
         SellerProfile seller = new SellerProfile(
             user.getId(),
-            "Duplicate SKU Shop"
+            "Seller Shop" + System.nanoTime()
         );
 
         sellerRepo.save(seller);
@@ -202,32 +210,67 @@ public class ProductVariantRepositoryIT extends AbstractIntegrationTest {
             "Description",
             "product-one"
         );
-
-        Product productTwo = Product.createDraft(
-            seller.getId(),
-            "Product Two",
-            "Description",
-            "product-two"
-        );
-
+        
         ProductVariant variantOne = new ProductVariant(
             "DUP-SKU",
             BigDecimal.valueOf(5.00)
         );
         productOne.addVariant(variantOne);
         productRepo.save(productOne);
-        productRepo.save(productTwo);
-
 
         ProductVariant variantTwo = new ProductVariant(
             "DUP-SKU",
             BigDecimal.valueOf(6.00)
         );
-        productTwo.addVariant(variantTwo);
+        productOne.addVariant(variantTwo);
 
         assertThrows(
             DataIntegrityViolationException.class,
-            () -> productRepo.saveAndFlush(productTwo)
+            () -> productRepo.saveAndFlush(productOne)
         );
+    }
+
+    @Test
+    void sameSkuAllowedAcrossDifferentProducts() {
+        User userOne = userRepo.save(new User(
+            "seller-one-" + System.nanoTime() + "@example.com",
+            "pw"
+        ));
+
+        SellerProfile sellerOne = sellerRepo.save(new SellerProfile(
+            userOne.getId(),
+            "Seller One " + System.nanoTime()
+        ));
+
+        Product productOne = Product.createDraft(
+            sellerOne.getId(),
+            "Product One",
+            "Description",
+            "product-one-" + System.nanoTime()
+        );
+
+        ProductVariant variantOne = new ProductVariant(
+            "SHARED-SKU",
+            new BigDecimal("10.00")
+        );
+
+        productOne.addVariant(variantOne);
+        productRepo.saveAndFlush(productOne);
+
+        Product productTwo = Product.createDraft(
+            sellerOne.getId(),
+            "Product Two",
+            "Description",
+            "product-two-" + System.nanoTime()
+        );
+
+        ProductVariant variantTwo = new ProductVariant(
+            "SHARED-SKU",
+            new BigDecimal("12.00")
+        );
+
+        productTwo.addVariant(variantTwo);
+
+        assertDoesNotThrow(() -> productRepo.saveAndFlush(productTwo));
     }
 }

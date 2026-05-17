@@ -4,8 +4,7 @@ import com.quang.marketplace.AbstractIntegrationTest;
 import com.quang.marketplace.modules.catalog.domain.Product;
 import com.quang.marketplace.modules.catalog.domain.ProductStatus;
 import com.quang.marketplace.modules.catalog.domain.ProductVariant;
-import com.quang.marketplace.modules.identity.domain.User;
-import com.quang.marketplace.modules.seller.domain.SellerProfile;
+import com.quang.marketplace.modules.catalog.domain.ProductVariantInventory;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,7 +12,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -38,6 +36,22 @@ class ProductRepositoryIT extends AbstractIntegrationTest {
 
         assertEquals(ProductStatus.DRAFT, reloaded.getStatus());
         assertFalse(reloaded.isPublished());
+    }
+
+    @Test
+    void saveProduct_persistsSellerProfileId() {
+        Product product = Product.createDraft(
+            123L,
+            "Product",
+            "Description",
+            "product-seller-id"
+        );
+
+        Product saved = productRepo.saveAndFlush(product);
+
+        Product reloaded = productRepo.findById(saved.getId()).orElseThrow();
+
+        assertEquals(123L, reloaded.getSellerProfileId());
     }
 
     @Test
@@ -84,6 +98,61 @@ class ProductRepositoryIT extends AbstractIntegrationTest {
 
         assertEquals(1, reloaded.getVariants().size());
         assertEquals("SKU-1", reloaded.getVariants().get(0).getSku());
+    }
+
+    @Test
+    void publish_persistsPublishedStatus() {
+        Product product = Product.createDraft(
+            1L,
+            "Published Product",
+            "Description",
+            "published-product"
+        );
+
+        ProductVariant variant = new ProductVariant(
+            "SKU-PUBLISHED",
+            new BigDecimal("10.00")
+        );
+
+        product.addVariant(variant);
+        product.publish();
+
+        Product saved = productRepo.saveAndFlush(product);
+
+        Product reloaded = productRepo.findById(saved.getId()).orElseThrow();
+
+        assertEquals(ProductStatus.PUBLISHED, reloaded.getStatus());
+        assertTrue(reloaded.isPublished());
+    }
+
+    @Test
+    void productWithVariantsAndInventoryCanBeReloadedForPublishValidation() {
+        Product product = Product.createDraft(
+            1L,
+            "Inventory Product",
+            "Description",
+            "inventory-product"
+        );
+
+        ProductVariant variant = new ProductVariant(
+            "SKU-INVENTORY",
+            new BigDecimal("10.00")
+        );
+
+        variant.assignInventory(new ProductVariantInventory(5));
+        product.addVariant(variant);
+
+        Product saved = productRepo.saveAndFlush(product);
+
+        Product reloaded = productRepo.findById(saved.getId()).orElseThrow();
+
+        assertEquals(1, reloaded.getVariants().size());
+
+        ProductVariant reloadedVariant = reloaded.getVariants().get(0);
+
+        assertNotNull(reloadedVariant.getInventory());
+        assertEquals(5, reloadedVariant.getInventory().getOnHandQuantity());
+        assertEquals(5, reloadedVariant.getInventory().getAvailableQuantity());
     }
 
     @Test

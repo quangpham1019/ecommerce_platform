@@ -4,10 +4,12 @@ import com.quang.marketplace.modules.catalog.application.ProductService;
 import com.quang.marketplace.modules.catalog.domain.Product;
 import com.quang.marketplace.modules.catalog.domain.ProductVariant;
 import com.quang.marketplace.shared.security.CurrentUserProvider;
+
+import jakarta.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.net.URI;
 
 @RestController
@@ -23,7 +25,7 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<?> create(@RequestBody CreateProductRequest req) {
+    public ResponseEntity<?> create(@Valid @RequestBody CreateProductRequest req) {
         Long userId = currentUserProvider.getCurrentUserId();
         Product p = service.createProduct(userId, req);
         return ResponseEntity.created(URI.create("/api/products/" + p.getId())).body(p.getId());
@@ -31,7 +33,7 @@ public class ProductController {
 
     @PostMapping("/{id}/variants")
     public ResponseEntity<?> addVariant(@PathVariable("id") Long productId,
-                                        @RequestBody AddVariantRequest req) {
+                                        @Valid @RequestBody AddVariantRequest req) {
         Long userId = currentUserProvider.getCurrentUserId();
         ProductVariant v = service.addVariant(userId, productId, req);
         return ResponseEntity.created(URI.create("/api/products/" + productId + "/variants/" + v.getId())).body(v.getId());

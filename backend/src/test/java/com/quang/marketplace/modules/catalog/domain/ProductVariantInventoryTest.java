@@ -13,7 +13,7 @@ public class ProductVariantInventoryTest {
     void newInventory_rejectsNegativeOnHandQuantity() {
         assertThrows(
             ValidationException.class,
-            () -> new ProductVariantInventory()
+            () -> new ProductVariantInventory(-1)
         );
     }
 
@@ -21,7 +21,6 @@ public class ProductVariantInventoryTest {
     void newInventory_withValidInputs_storesInitialQuantity() {
         ProductVariantInventory inventory = new ProductVariantInventory( 10);
 
-        assertEquals(1L, inventory.getProductVariantId());
         assertEquals(10, inventory.getOnHandQuantity());
         assertEquals(0, inventory.getReservedQuantity());
         assertEquals(10, inventory.getAvailableQuantity());

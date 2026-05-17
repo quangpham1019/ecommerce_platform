@@ -3,13 +3,14 @@ package com.quang.marketplace.modules.catalog.infrastructure;
 import com.quang.marketplace.modules.catalog.api.AddVariantRequest;
 import com.quang.marketplace.modules.catalog.application.ProductService;
 import com.quang.marketplace.modules.catalog.domain.Product;
-import com.quang.marketplace.modules.catalog.domain.ProductVariant;
 import com.quang.marketplace.modules.identity.domain.User;
+import com.quang.marketplace.modules.identity.infrastructure.UserRepository;
 import com.quang.marketplace.modules.seller.domain.SellerProfile;
+import com.quang.marketplace.modules.seller.infrastructure.SellerProfileRepository;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -32,12 +33,12 @@ public class ProductTransactionIT extends com.quang.marketplace.AbstractIntegrat
     ProductVariantRepository variantRepo;
 
     @Autowired
-    com.quang.marketplace.modules.seller.infrastructure.SellerProfileRepository sellerRepo;
+    SellerProfileRepository sellerRepo;
 
     @Autowired
-    com.quang.marketplace.modules.identity.infrastructure.UserRepository userRepo;
+    UserRepository userRepo;
 
-    @MockBean
+    @Autowired
     ProductVariantInventoryRepository inventoryRepo;
 
     @Test
