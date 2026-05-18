@@ -116,10 +116,11 @@ Inventory and persistence
 
 ## Cart
 
-- `GET /api/cart`
-- `POST /api/cart/items`
-- `PATCH /api/cart/items/{itemId}`
-- `DELETE /api/cart/items/{itemId}`
+- `GET /api/carts/active`
+- `POST /api/carts/items`
+- `PATCH /api/carts/items/{itemId}`
+- `DELETE /api/carts/items/{itemId}`
+- `POST /api/carts/clear`
 
 ## Checkout and Order
 

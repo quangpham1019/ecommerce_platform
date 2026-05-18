@@ -244,10 +244,11 @@ Use cases should become task-oriented endpoints.
 
 ### Cart
 
-- `GET /api/cart`
-- `POST /api/cart/items`
-- `PATCH /api/cart/items/{itemId}`
-- `DELETE /api/cart/items/{itemId}`
+- `GET /api/carts/active`
+- `POST /api/carts/items`
+- `PATCH /api/carts/items/{itemId}`
+- `DELETE /api/carts/items/{itemId}`
+- `POST /api/carts/clear`
 
 ### Checkout and Order
 
@@ -456,20 +457,29 @@ Exit criteria:
 
 Primary slice:
 
-- Buyer adds product to cart -> checkout -> order created
+- Authenticated buyer checks out a cart containing published variants from multiple sellers.
 
 Stories:
 
 - As a buyer, I can browse published products
 - As a buyer, I can add a product variant to my cart
 - As a buyer, I can update quantities in my cart
-- As a buyer, I can checkout successfully
+- As a guest, I can build a cart using a guest session token and continue after login
+- As an authenticated buyer, I can checkout successfully
 - As the system, I split the checkout into seller-specific orders
 
 Business rules covered:
 
-- Only published products can enter cart
-- Cart quantity cannot exceed available inventory
+- Cart item must reference a specific product variant.
+- Cart item quantity must be positive.
+- Cart cannot contain unavailable/unpublished variants.
+- Checkout requires an authenticated buyer.
+- Checkout cannot proceed with an empty cart.
+- Checkout must revalidate all cart items before reserving inventory.
+- Checkout must reserve inventory before creating confirmed orders.
+- Guest cart is preserved across sessions and merges into authenticated carts on login.
+- Checkout must clear cart after successful checkout.
+- Cart quantity cannot exceed available inventory.
 - Checkout snapshots product name, variant, price, and quantity
 - One checkout can create multiple seller-specific orders
 
@@ -481,7 +491,7 @@ Tests:
 
 Exit criteria:
 
-- A buyer can checkout a mixed cart and receive seller-specific orders
+- A buyer can add published variants from multiple sellers to cart, checkout successfully, inventory is reserved, seller-specific orders are created, order item snapshots are persisted, and the cart is cleared.
 
 ### Sprint 3: Payment, Fulfillment, and Reliability
 

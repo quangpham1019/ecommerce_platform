@@ -5,6 +5,9 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.quang.marketplace.shared.error.ResourceNotFoundException;
+import com.quang.marketplace.shared.error.ValidationException;
+
 @Entity
 @Table(name = "carts")
 public class Cart {
@@ -20,7 +23,7 @@ public class Cart {
     private String guestToken;
 
     @Column(name = "status", nullable = false)
-    private String status = "ACTIVE";
+    private CartStatus status = CartStatus.ACTIVE;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -34,6 +37,15 @@ public class Cart {
     protected Cart() {}
 
     public Cart(Long userId, String guestToken) {
+
+        if (userId != null && guestToken != null && !guestToken.isBlank()) {
+            throw new ValidationException("Cannot provide both user ID and guest token");
+        }
+        
+        if (userId == null && (guestToken == null || guestToken.isBlank())) {
+            throw new ValidationException("User ID or guest token must be provided");
+        }
+
         this.userId = userId;
         this.guestToken = guestToken;
     }
@@ -47,7 +59,7 @@ public class Cart {
     public Long getId() { return id; }
     public Long getUserId() { return userId; }
     public String getGuestToken() { return guestToken; }
-    public String getStatus() { return status; }
+    public CartStatus getStatus() { return status; }
     public List<CartItem> getItems() { return items; }
 
     public void addItem(CartItem item) {
@@ -69,6 +81,6 @@ public class Cart {
         return items.stream()
             .filter(item -> item.getProductVariantId().equals(productVariantId))
             .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("Item not found in cart"));
+            .orElseThrow(() -> new ResourceNotFoundException("Item not found in cart"));
     }
 }
